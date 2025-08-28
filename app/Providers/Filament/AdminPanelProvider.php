@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -40,6 +41,16 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            ->plugins([
+                FilamentDeveloperLoginsPlugin::make()
+                    ->enabled(app()->environment('local')) // Only enable in local environment
+                    ->users([
+                        'Admin' => 'admin@example.com',
+                        'User' => 'user@example.com',
+                        'Manager' => 'manager@example.com',
+                    ])
+                    ->switchable(true), // Enable the switch user feature
             ])
             ->middleware([
                 EncryptCookies::class,
