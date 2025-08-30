@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -44,5 +45,42 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get all accounts for the user.
+     */
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(Account::class);
+    }
+
+    /**
+     * Get active accounts for the user.
+     */
+    public function activeAccounts(): HasMany
+    {
+        return $this->accounts()->where('is_active', true);
+    }
+
+    /**
+     * Get the primary account for the user.
+     */
+    public function primaryAccount()
+    {
+        return $this->accounts()->where('is_primary', true)->first();
+    }
+
+    /**
+     * Calculate total net worth from all accounts.
+     */
+    public function getNetWorth(): float
+    {
+        return $this->accounts()
+            ->where('include_in_net_worth', true)
+            ->get()
+            ->sum(function ($account) {
+                return $account->getNetWorthContribution();
+            });
     }
 }
